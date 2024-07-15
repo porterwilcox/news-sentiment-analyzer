@@ -4,6 +4,7 @@ export class Article {
     url: string;
     urlToImage: string;
     publishedAt: string;
+    sentiment: string;
 
     constructor(article: any) {
         this.source = article['source']['name'];
@@ -11,6 +12,7 @@ export class Article {
         this.url = article['url'];
         this.urlToImage = article['urlToImage'];
         this.publishedAt = article['publishedAt'];
+        this.sentiment = '';  // To be determined by the data-analyzer
     }
 
     get pojo() {
@@ -19,7 +21,8 @@ export class Article {
             title: this.title,
             url: this.url,
             urlToImage: this.urlToImage,
-            publishedAt: this.publishedAt
+            publishedAt: this.publishedAt,
+            sentiment: this.sentiment
         }
     }
 }
