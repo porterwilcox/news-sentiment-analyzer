@@ -15,12 +15,12 @@ const topHeadlinesUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=
 
 export const scheduledNewsCollection = functions.pubsub.schedule('0 7,12,17 * * *')
     .timeZone('America/Denver')
-    .onRun(async (_) => {
+    .onRun(async (context) => {
         try {
             await collectNews();
         } catch (e) {
             logger.error('Error collecting news', e);
-        }       
+        }
     });
 
 export const requestNewsCollection = functions.https.onCall(async (data, context) => {
@@ -37,7 +37,7 @@ const collectNews = async () => {
     const articles = await getTopHeadlines();
     const parsedArticles = parseArticles(articles);
     await saveArticlesIfNotExists(parsedArticles);
-}
+};
 
 const getTopHeadlines = async () : Promise<any[]> => {
     const response = await axios.get(topHeadlinesUrl);
@@ -46,15 +46,15 @@ const getTopHeadlines = async () : Promise<any[]> => {
         return [];
     }
     return response.data.articles;
-}
+};
 
 const parseArticles = (articles: any[]) : Article[] => {
     return articles
         .filter(article => article['source']['name'] != '[Removed]')
         .map(article => {
-            return Article.fromApiData(article); 
+            return Article.fromApiData(article);
         });
-}
+};
 
 const saveArticlesIfNotExists = async (articles: Article[]) => {
     const db = admin.firestore();
@@ -65,4 +65,4 @@ const saveArticlesIfNotExists = async (articles: Article[]) => {
     for (const article of newArticles) {
         await articlesCollection.add(article.pojo);
     }
-}
+};

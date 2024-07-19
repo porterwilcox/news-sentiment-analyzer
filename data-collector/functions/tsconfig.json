@@ -10,6 +10,12 @@
   },
   "compileOnSave": true,
   "include": [
-    "src"
+    "src",
+    "__tests__",
+    "jest.config.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib"
   ]
 }

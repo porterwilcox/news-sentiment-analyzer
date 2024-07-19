@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 
 const test = firebaseFunctionsTest({
   projectId: 'newssentimentanalyzer',
-  databaseURL: 'http://localhost:8080'
+  databaseURL: 'http://localhost:8080',
 });
 
 process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
