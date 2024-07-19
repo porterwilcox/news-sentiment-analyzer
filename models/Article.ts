@@ -6,13 +6,27 @@ export class Article {
     publishedAt: string;
     sentiment: string;
 
-    constructor(article: any) {
-        this.source = article['source']['name'];
-        this.title = article['title'].substring(0, article['title'].indexOf('-')).trim();
-        this.url = article['url'];
-        this.urlToImage = article['urlToImage'];
-        this.publishedAt = article['publishedAt'];
-        this.sentiment = '';  // To be determined by the data-analyzer
+    constructor(source: string, title: string, url: string, urlToImage: string, publishedAt: string, sentiment: string = '') {
+        this.source = source;
+        this.title = title;
+        this.url = url;
+        this.urlToImage = urlToImage;
+        this.publishedAt = publishedAt;
+        this.sentiment = sentiment;
+    }
+
+    static fromApiData(data: any) : Article {
+        let title = data['title'];
+        if (title.includes(' - ')) {
+            title = data['title'].substring(0, data['title'].indexOf('-')).trim();
+        }
+        return new Article(
+            data['source']['name'],
+            title,
+            data['url'],
+            data['urlToImage'],
+            data['publishedAt']
+        );
     }
 
     get pojo() {
