@@ -2,7 +2,7 @@ import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import OpenAI from "openai";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+// import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { ChatCompletionMessageParam, ChatCompletionTool } from "openai/resources";
 import { ArticleSentimentAnalysis } from "../../../models/ArticleSentimentAnalysis";
 
@@ -97,30 +97,63 @@ const exampleMessages: ChatCompletionMessageParam[] = [
     },
 ];
 
+//NOTE 2nd gen cloud function trigger worked in tests and with the emulator, but failed to deploy
+// export const analyzeArticleSentiment = onDocumentCreated('articles/{articleId}', async (event) => {
+//     const snapshot = event.data;
+//     if (!snapshot) {
+//         return;
+//     }
 
-export const anazlyzeArticlesSentiment = onDocumentCreated('articles/{articleId}', async (event) => {
-    const snapshot = event.data;
-    if (!snapshot) {
-        return;
-    }
+//     const article = snapshot.data();
+//     if (!article) {
+//         return;
+//     }
 
-    const article = snapshot.data();
-    if (!article) {
-        return;
-    }
+//     const analysis = await analyzeSentiment(article);
+//     if (!analysis) {
+//         logger.error('Error analyzing article sentiment');
+//         return;
+//     }
 
-    const analysis = await analyzeSentiment(article);
-    if (!analysis) {
-        logger.error('Error analyzing article sentiment');
-        return;
-    }
+//     const writeResult = await updateArticle(snapshot.ref, analysis);
+//     if (writeResult.writeTime) {
+//         logger.info('Article sentiment analysis complete');
+//     } else {
+//         logger.error('Error updating article sentiment');
+//     }
+// });
 
-    const writeResult = await updateArticle(snapshot.ref, analysis);
-    if (writeResult.writeTime) {
-        logger.info('Article sentiment analysis complete');
-    } else {
-        logger.error('Error updating article sentiment');
+export const analyzeArticleSentiment = functions.firestore.document('articles/{articleId}')
+    .onCreate(async (snapshot, context) => {
+        const article = snapshot.data();
+        if (!article) {
+            return;
+        }
+
+        const analysis = await analyzeSentiment(article);
+        if (!analysis) {
+            logger.error('Error analyzing article sentiment');
+            return;
+        }
+
+        const writeResult = await updateArticle(snapshot.ref, analysis);
+        if (writeResult.writeTime) {
+            logger.info('Article sentiment analysis complete');
+        } else {
+            logger.error('Error updating article sentiment');
+        }
     }
+);
+
+export const processUnanalyzedArticles = functions.https.onCall(async (data, context) => {
+    const unanalyzedArticles = await admin.firestore().collection('articles').where('sentiment', '==', '').get();
+    for (const article of unanalyzedArticles.docs) {
+        const analysis = await analyzeSentiment(article.data());
+        if (analysis) {
+            await updateArticle(article.ref, analysis);
+        }
+    }
+    return { result: 'Articles analyzed' };
 });
 
 

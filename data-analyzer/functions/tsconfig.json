@@ -11,6 +11,8 @@
   "compileOnSave": true,
   "include": [
     "src",
+    "__tests__",
+    "jest.config.js",
     "../../models/**/*.ts"
   ],
   "exclude": [

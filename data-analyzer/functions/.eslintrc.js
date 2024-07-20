@@ -33,5 +33,6 @@ module.exports = {
     "linebreak-style": 0,
     "max-len": 1,
     "arrow-parens": 0,
+    "spaced-comment": 0,
   },
 };
