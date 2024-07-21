@@ -18,7 +18,7 @@ export class Article {
     static fromApiData(data: any) : Article {
         let title = data['title'];
         if (title.includes(' - ')) {
-            title = data['title'].substring(0, data['title'].indexOf('-')).trim();
+            title = data['title'].substring(0, data['title'].lastIndexOf(' - ')).trim();
         }
         return new Article(
             data['source']['name'],
