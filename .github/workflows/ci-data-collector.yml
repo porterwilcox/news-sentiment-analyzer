@@ -1,0 +1,61 @@
+name: Continuous Integration for Data Collector
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'data-collector/functions/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      # Service for Firebase Emulator
+      firebase:
+        image: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+        ports:
+          - 8080:8080
+        options: >-
+          --entrypoint "/bin/bash -c 'apt-get update && apt-get install -y wget && wget https://download.java.net/java/GA/jdk21/13/GPL/openjdk-21_linux-x64_bin.tar.gz && tar -xvf openjdk-21_linux-x64_bin.tar.gz && mv jdk-21 /usr/local/ && update-alternatives --install /usr/bin/java java /usr/local/jdk-21/bin/java 1 && update-alternatives --set java /usr/local/jdk-21/bin/java && curl -sL https://firebase.tools | bash && firebase setup:emulators:firestore && firebase emulators:start --only firestore --project newssentimentanalyzer &> /dev/null &'"
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Create .runtimeconfig.json
+      run: |
+        echo '{
+          "newsapi": {
+            "apikey": "${{ secrets.NEWS_API_KEY }}"
+          }
+        }' > ./data-collector/functions/.runtimeconfig.json
+
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./data-collector/functions
+
+    - name: Build the project
+      run: npm run build
+      working-directory: ./data-collector/functions
+
+    - name: Wait for Firestore emulator to start
+      run: sleep 15
+
+    - name: Run tests
+      env:
+        FIRESTORE_EMULATOR_HOST: localhost:8080
+      run: npm run test
+      working-directory: ./data-collector/functions
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: data-collector/functions/test-results/
