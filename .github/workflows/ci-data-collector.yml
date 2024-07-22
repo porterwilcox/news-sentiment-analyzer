@@ -52,10 +52,3 @@ jobs:
           FIRESTORE_EMULATOR_HOST: localhost:8080
         run: npm run test
         working-directory: ./data-collector/functions
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: ./data-collector/functions/test-results/
