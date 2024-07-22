@@ -66,3 +66,5 @@ const saveArticlesIfNotExists = async (articles: Article[]) => {
         await articlesCollection.add(article.pojo);
     }
 };
+
+//NOTE comment to trigger CI workflow
