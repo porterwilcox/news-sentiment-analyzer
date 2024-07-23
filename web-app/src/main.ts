@@ -4,8 +4,13 @@ import './registerServiceWorker'
 import router from './router'
 import { VueFire } from 'vuefire'
 import { firebaseApp } from './firebase'
+import { getAnalytics } from 'firebase/analytics'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
+
+if (typeof window !== 'undefined') {
+    getAnalytics(firebaseApp);
+}
 
 const app = createApp(App)
 app.use(router)

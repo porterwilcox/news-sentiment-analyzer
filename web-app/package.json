@@ -1,10 +1,11 @@
 {
-  "name": "web-app",
+  "name": "news-sentiments",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "generate-manifest": "node generate-manifest.js",
+    "build": "npm run generate-manifest && vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
     "lint": "vue-cli-service lint"
