@@ -1,4 +1,4 @@
-name: Continuous Integration for Data Collector
+name: Continuous Integration and Deployment for Data Collector
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - 'data-collector/functions/**'
 
 jobs:
-  test:
+  build-test-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -51,4 +51,9 @@ jobs:
         env:
           FIRESTORE_EMULATOR_HOST: localhost:8080
         run: npm run test
+        working-directory: ./data-collector/functions
+
+      - name: Deploy to Firebase
+        if: success()
+        run: firebase deploy --only functions:analyzeArticleSentiment,functions:processUnanalyzedArticles --project newssentimentanalyzer --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
         working-directory: ./data-collector/functions
