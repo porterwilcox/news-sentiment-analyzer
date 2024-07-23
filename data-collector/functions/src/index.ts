@@ -10,7 +10,7 @@ if (!admin.apps.length) {
 }
 
 const newsApiKey = functions.config().newsapi.apikey;
-const topHeadlinesUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${newsApiKey}`;
+const topHeadlinesUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${newsApiKey}&pageSize=100`;
 
 
 export const scheduledNewsCollection = functions.pubsub.schedule('0 7,12,17 * * *')
