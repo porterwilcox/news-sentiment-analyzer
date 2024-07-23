@@ -55,5 +55,5 @@ jobs:
 
       - name: Deploy to Firebase
         if: success()
-        run: firebase deploy --only functions:analyzeArticleSentiment,functions:processUnanalyzedArticles --project newssentimentanalyzer --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
+        run: firebase deploy --only functions:scheduledNewsCollection,functions:requestNewsCollection --project newssentimentanalyzer --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
         working-directory: ./data-collector/functions
