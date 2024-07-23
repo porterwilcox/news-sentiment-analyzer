@@ -122,6 +122,12 @@ const calculateNegativePosition = (severity: number) => {
   }
   return percentage;
 }
+
+const getLocalePublishedTime = (publishedAtDateString: string) => {
+  const options: Intl.DateTimeFormatOptions = { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, /*year: 'numeric', month: 'numeric', day: 'numeric',*/ hour: 'numeric', minute: 'numeric' }
+  const date = new Date(publishedAtDateString)
+  return new Intl.DateTimeFormat('default', options).format(date)
+}
 </script>
 
 <template>
@@ -134,7 +140,7 @@ const calculateNegativePosition = (severity: number) => {
             <p class="article-source text-end mb-0">- {{ article.source }}</p>
             <div class="d-flex justify-content-between">
               <a :href="article.url" target="_blank" :class="article.sentiment + '-link'"><b>Read more</b></a>
-              <p class="article-date">{{ new Date(article.publishedAt).toLocaleTimeString() + ' ' + new Date(article.publishedAt).toLocaleDateString() }}</p>
+              <p class="article-date">{{ getLocalePublishedTime(article.publishedAt) }}</p>
             </div>
           </div>
           <div class="w-100 d-flex align-items-center sentiment-container position-relative">

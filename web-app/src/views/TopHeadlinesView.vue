@@ -29,45 +29,38 @@ const positiveNews = useCollection(postiveNewsQuery)
 const neutralNews = useCollection(neutralNewsQuery)
 const negativeNews = useCollection(negativeNewsQuery)
 
-const yesterday = new Date()
-yesterday.setDate(yesterday.getDate() - 1)
-let yesterdayMonth: string | number = yesterday.getMonth() + 1
-yesterdayMonth = yesterdayMonth < 10 ? '0' + yesterdayMonth : yesterdayMonth
-const date = ref(yesterday.getFullYear() + '-' + yesterdayMonth + '-' + yesterday.getDate())
 
 const today = new Date()
 let todayMonth: string | number = today.getMonth() + 1
 todayMonth = todayMonth < 10 ? '0' + todayMonth : todayMonth
 const todayDateString = ref(today.getFullYear() + '-' + todayMonth + '-' + today.getDate())
-const articlesProcessedStartingDate = ref('2024-07-19')
-
-const getClientLocaleDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, year: 'numeric', month: 'numeric', day: 'numeric' }
-  const date = new Date(dateString)
-  const localeDate = new Intl.DateTimeFormat('default', options).format(date)
-  return new Date(localeDate)
-}
+const articlesProcessedStartingDate = ref('2024-07-20')
+const selectedDate = ref(today.getFullYear() + '-' + todayMonth + '-' + today.getDate())
 
 const sentimentFilter = ref(3)  //1=All News, 2=Neutral & Positive, 3=Only Positive
 
 const isWithinDateRange = (article: DocumentData, date: string) => {
-  const publishedDate = getClientLocaleDate(article.publishedAt)
-  const d = new Date(date)
-  const tomorrow = new Date(d)
-  tomorrow.setDate(d.getDate() + 1)
-  return publishedDate >= d && publishedDate < tomorrow
-}
+  const publishedDate = new Date(article.publishedAt);
+
+  const localDate = new Date(date);
+  const startOfDay = new Date(localDate.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(localDate.setHours(23, 59, 59, 999));
+
+  const publishedLocalDate = new Date(publishedDate.toLocaleString("en-US", { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
+
+  return publishedLocalDate >= startOfDay && publishedLocalDate <= endOfDay;
+};
 
 const filteredPositiveNews = computed(() => {
-  return positiveNews.value.filter(article => isWithinDateRange(article, date.value))
+  return positiveNews.value.filter(article => isWithinDateRange(article, selectedDate.value))
 })
 const filteredNeutralNews = computed(() => {
   if (sentimentFilter.value == 3) return [];
-  return neutralNews.value.filter(article => isWithinDateRange(article, date.value))
+  return neutralNews.value.filter(article => isWithinDateRange(article, selectedDate.value))
 })
 const filteredNegativeNews = computed(() => {
   if (sentimentFilter.value != 1) return [];
-  return negativeNews.value.filter(article => isWithinDateRange(article, date.value))
+  return negativeNews.value.filter(article => isWithinDateRange(article, selectedDate.value))
 })
 
 const articleCount = computed(() => {
@@ -82,8 +75,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <h3>Top Headlines <span class="font-small">Processed 7am, 12pm, & 5pm MTN</span></h3>
-  <p class="font-small m-0">This project began processing news headlines on 7/19/2024</p>
+  <h3>Top Headlines <span class="font-small">Every 4 hours from 4am-8pm MTN</span></h3>
+  <p class="font-small m-0">This project began processing news headlines on 7/20/2024</p>
   <div class="row">
     <div class="col-12 col-md-8">
       <hr/>
@@ -103,7 +96,7 @@ onMounted(() => {
       <div class="d-flex flex-row justify-content-between align-items-end my-3">
         <div class="d-flex align-items-end">
           <label for="date" class="me-2">Published Date:</label>
-          <input type="date" id="date" v-model="date" :min="articlesProcessedStartingDate" :max="todayDateString" />
+          <input type="date" id="date" v-model="selectedDate" :min="articlesProcessedStartingDate" :max="todayDateString" />
         </div>
         <div>
           <p class="mb-0">{{ articleCount }} Article{{ articleCount != 1 ? 's' : '' }}</p>
@@ -120,7 +113,7 @@ onMounted(() => {
 
     <div v-if="!articleCount" class="my-5 py-5 text-center">
       <h4>No articles found for the selected date and sentiment filter</h4>
-      <p v-if="date == todayDateString">The <a href="https://newsapi.org/" target="_blank">NewsAPI</a> likely hasn't returned any articles published today, yet.</p>
+      <p v-if="selectedDate == todayDateString">The <a href="https://newsapi.org/" target="_blank">NewsAPI</a> likely hasn't returned any articles published today, yet.</p>
     </div>
   </div>
 </template>

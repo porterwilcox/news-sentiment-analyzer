@@ -13,7 +13,7 @@ const newsApiKey = functions.config().newsapi.apikey;
 const topHeadlinesUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${newsApiKey}&pageSize=100`;
 
 
-export const scheduledNewsCollection = functions.pubsub.schedule('0 7,12,17 * * *')
+export const scheduledNewsCollection = functions.pubsub.schedule('0 4,8,12,16,20 * * *')
     .timeZone('America/Denver')
     .onRun(async (context) => {
         try {
