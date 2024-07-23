@@ -42,7 +42,7 @@
     <p class="px-4">&emsp;&emsp;| <a href="https://github.com/porterwilcox/news-sentiment-analyzer/tree/main/web-app" target="_blank">web-app</a></p>
     <p class="px-4">View the project at this GitHub <a href="https://github.com/porterwilcox/news-sentiment-analyzer" target="_blank">repository</a>.</p>
     <h6 class="px-4">Whiteboard Architecture</h6>
-    <img class="px-5 mb-1" src="https://github.com/porterwilcox/news-sentiment-analyzer/blob/main/web-app/src/assets/whiteboard-architecture.jpeg" alt="Firebase Analytics Dashboard" />
+    <img class="px-5 mb-1" style="max-width: 95%;" src="https://github.com/porterwilcox/news-sentiment-analyzer/blob/main/web-app/src/assets/whiteboard-architecture.jpeg?raw=true" alt="Whiteboard Architecture" />
 
     <br />
     <br />
@@ -140,7 +140,7 @@ const exampleMessages: ChatCompletionMessageParam[] = [
     <br />
     <h5 class="px-2">Production Monitoring & Analytics</h5>
     <p class="px-4">Firebase provides a suite of tools for monitoring and analyzing the production environment as well as tracking user engagement and retention. Detailled logs of crashes are also reported by this suite. Here is an image of the analytics dashboard for this project.</p>
-    <img class="px-4 mb-1" src="https://github.com/porterwilcox/news-sentiment-analyzer/blob/main/web-app/src/assets/production-monitoring.png" alt="Firebase Analytics Dashboard" />
+    <img class="px-4 mb-1" style="max-width: 95%;" src="https://github.com/porterwilcox/news-sentiment-analyzer/blob/main/web-app/src/assets/production-monitoring.png?raw=true" alt="Firebase Analytics Dashboard" />
 
     <br />
     <br />
