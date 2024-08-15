@@ -67,7 +67,7 @@ const saveArticlesIfNotExists = async (articles: Article[]) => {
     const existingArticles = await articlesCollection
         .where('publishedAt', '>=', threeDaysAgoISOString)
         .get();
-        
+
     const existingArticleTitles = existingArticles.docs.map(doc => doc.data().title);
     const newArticles = articles.filter(article => !existingArticleTitles.includes(article.title));
 
