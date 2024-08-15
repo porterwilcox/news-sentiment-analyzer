@@ -1,34 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useCollection, useFirestore } from 'vuefire'
 import { collection, query, where, orderBy, DocumentData } from 'firebase/firestore'
 import ArticleCardCmp from '@/components/ArticleCardCmp.vue'
 
 const db = useFirestore()
-
-const postiveNewsQuery = query(
-  collection(db, 'articles'),
-  where('sentiment', '==', 'positive'),
-  orderBy('severity', 'desc'),
-  orderBy('publishedAt', 'desc')
-)
-const neutralNewsQuery = query(
-  collection(db, 'articles'),
-  where('sentiment', '==', 'neutral'),
-  orderBy('severity', 'asc'),
-  orderBy('publishedAt', 'desc')
-)
-const negativeNewsQuery = query(
-  collection(db, 'articles'),
-  where('sentiment', '==', 'negative'),
-  orderBy('severity', 'asc'),
-  orderBy('publishedAt', 'desc')
-)
-
-const positiveNews = useCollection(postiveNewsQuery)
-const neutralNews = useCollection(neutralNewsQuery)
-const negativeNews = useCollection(negativeNewsQuery)
-
 
 const today = new Date()
 let todayMonth: string | number = today.getMonth() + 1
@@ -36,6 +12,50 @@ todayMonth = todayMonth < 10 ? '0' + todayMonth : todayMonth
 const todayDateString = ref(today.getFullYear() + '-' + todayMonth + '-' + today.getDate())
 const articlesProcessedStartingDate = ref('2024-07-20')
 const selectedDate = ref(today.getFullYear() + '-' + todayMonth + '-' + today.getDate())
+const getStartAndEndOfDay = (dateString: string) => {
+  const date = new Date(dateString);
+  const start = new Date(date.setHours(0, 0, 0, 0)).toISOString();
+  const end = new Date(date.setHours(23, 59, 59, 999)).toISOString();
+  return { start, end };
+};
+
+let positiveNews = ref([])
+let neutralNews = ref([])
+let negativeNews = ref([])
+
+watch(selectedDate, (newDate) => {
+  const { start, end } = getStartAndEndOfDay(newDate);
+
+  const postiveNewsQuery = query(
+    collection(db, 'articles'),
+    where('sentiment', '==', 'positive'),
+    where('publishedAt', '>=', start),
+    where('publishedAt', '<=', end),
+    orderBy('severity', 'desc'),
+    orderBy('publishedAt', 'desc')
+  );
+  positiveNews = useCollection(postiveNewsQuery);
+
+  const neutralNewsQuery = query(
+    collection(db, 'articles'),
+    where('sentiment', '==', 'neutral'),
+    where('publishedAt', '>=', start),
+    where('publishedAt', '<=', end),
+    orderBy('severity', 'asc'),
+    orderBy('publishedAt', 'desc')
+  );
+  neutralNews = useCollection(neutralNewsQuery);
+
+  const negativeNewsQuery = query(
+    collection(db, 'articles'),
+    where('sentiment', '==', 'negative'),
+    where('publishedAt', '>=', start),
+    where('publishedAt', '<=', end),
+    orderBy('severity', 'asc'),
+    orderBy('publishedAt', 'desc')
+  );
+  negativeNews = useCollection(negativeNewsQuery);
+}, { immediate: true });
 
 const sentimentFilter = ref(3)  //1=All News, 2=Neutral & Positive, 3=Only Positive
 

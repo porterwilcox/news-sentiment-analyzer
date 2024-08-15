@@ -59,9 +59,18 @@ const parseArticles = (articles: any[]) : Article[] => {
 const saveArticlesIfNotExists = async (articles: Article[]) => {
     const db = admin.firestore();
     const articlesCollection = db.collection('articles');
-    const existingArticles = await articlesCollection.get();
+
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const threeDaysAgoISOString = threeDaysAgo.toISOString();
+
+    const existingArticles = await articlesCollection
+        .where('publishedAt', '>=', threeDaysAgoISOString)
+        .get();
+        
     const existingArticleTitles = existingArticles.docs.map(doc => doc.data().title);
     const newArticles = articles.filter(article => !existingArticleTitles.includes(article.title));
+
     for (const article of newArticles) {
         await articlesCollection.add(article.pojo);
     }
