@@ -6,6 +6,7 @@ import axios from 'axios';
 const apiTestArticles = [
     {
         source: { name: 'Test Source' },
+        author: 'Test Author',
         title: 'Test Title',
         url: 'example.com',
         urlToImage: 'example.com/image.jpg',
@@ -13,6 +14,7 @@ const apiTestArticles = [
         sentiment: 'positive',
     }, {
         source: { name: 'Test Source 2' },
+        author: 'Test Author',
         title: 'Test Title 2',
         url: 'example.com/2',
         urlToImage: 'example.com/image2.jpg',

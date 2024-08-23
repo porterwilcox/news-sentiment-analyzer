@@ -21,7 +21,7 @@ export class Article {
             title = data['title'].substring(0, data['title'].lastIndexOf(' - ')).trim();
         }
         return new Article(
-            data['source']['name'],
+            data['author'],
             title,
             data['url'],
             data['urlToImage'],
