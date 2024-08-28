@@ -1,4 +1,3 @@
 ## News Sentiment Analyzer
 
-#### Project Overview
-> In our world where news spreads lightning fast the amount of negative news stories can be burdensome for many individuals.  Like all things in life, it’s important to find the balance of consuming the right amount of news stories to keep yourself knowledgeable while also not driving oneself to despair.  The News Sentiment Analyzer will help individuals maintain their balance by gathering top news stories and analyzing the sentiment of the headline.  Whereas top media news outlets don’t provide the sentiment of articles nor allow for sorting or viewing only top headlines of a specific sentiment rating, the News Sentiment Analyzer will do exactly that.  Individuals generally or circumstantially more burdened by bad news may choose to not display the negative headlines.
+[Check it out here](https://newssentimentanalyzer.web.app/)
