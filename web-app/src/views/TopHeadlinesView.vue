@@ -9,9 +9,11 @@ const db = useFirestore()
 const today = new Date()
 let todayMonth: string | number = today.getMonth() + 1
 todayMonth = todayMonth < 10 ? '0' + todayMonth : todayMonth
-const todayDateString = ref(today.getFullYear() + '-' + todayMonth + '-' + today.getDate())
+let todayDate: string | number = today.getDate()
+todayDate = todayDate < 10 ? '0' + todayDate : todayDate
+const todayDateString = ref(today.getFullYear() + '-' + todayMonth + '-' + todayDate)
 const articlesProcessedStartingDate = ref('2024-07-20')
-const selectedDate = ref(today.getFullYear() + '-' + todayMonth + '-' + today.getDate())
+const selectedDate = ref(today.getFullYear() + '-' + todayMonth + '-' + todayDate)
 const getStartAndEndOfDay = (dateString: string) => {
   const date = new Date(dateString);
   const start = new Date(date.setHours(0, 0, 0, 0)).toISOString();
