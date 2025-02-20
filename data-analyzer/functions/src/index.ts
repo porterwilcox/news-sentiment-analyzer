@@ -145,8 +145,18 @@ export const analyzeArticleSentiment = functions.firestore.document('articles/{a
     }
 );
 
-export const processUnanalyzedArticles = functions.https.onCall(async (data, context) => {
-    const unanalyzedArticles = await admin.firestore().collection('articles').where('sentiment', '==', '').get();
+export const processUnanalyzedArticles = functions.runWith({ timeoutSeconds: 540 }).https.onCall(async (data, context) => {
+    const date = new Date(data.date);
+    const start = new Date(date.setHours(0, 0, 0, 0)).toISOString();
+    const end = new Date(date.setHours(23, 59, 59, 999)).toISOString();
+
+    const unanalyzedArticles = await admin.firestore()
+        .collection('articles')
+        .where('sentiment', '==', '')
+        .where('publishedAt', '>=', start)
+        .where('publishedAt', '<=', end)
+        .get();
+        
     for (const article of unanalyzedArticles.docs) {
         const analysis = await analyzeSentiment(article.data());
         if (analysis) {

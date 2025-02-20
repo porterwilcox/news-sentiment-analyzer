@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useCollection, useFirestore } from 'vuefire'
-import { collection, query, where, orderBy, DocumentData } from 'firebase/firestore'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import ArticleCardCmp from '@/components/ArticleCardCmp.vue'
+import { DocumentData, collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { useFirestore } from 'vuefire';
 
-const db = useFirestore()
+const db = useFirestore();
+
+// Reactive state for articles
+const positiveNews = ref<any[]>([]);
+const neutralNews = ref<any[]>([]);
+const negativeNews = ref<any[]>([]);
 
 const today = new Date()
 let todayMonth: string | number = today.getMonth() + 1
@@ -14,6 +19,8 @@ todayDate = todayDate < 10 ? '0' + todayDate : todayDate
 const todayDateString = ref(today.getFullYear() + '-' + todayMonth + '-' + todayDate)
 const articlesProcessedStartingDate = ref('2024-07-20')
 const selectedDate = ref(today.getFullYear() + '-' + todayMonth + '-' + todayDate)
+
+// Function to get start and end of the day as Firestore Timestamps
 const getStartAndEndOfDay = (dateString: string) => {
   const date = new Date(dateString);
   const start = new Date(date.setHours(0, 0, 0, 0)).toISOString();
@@ -21,43 +28,54 @@ const getStartAndEndOfDay = (dateString: string) => {
   return { start, end };
 };
 
-let positiveNews = ref([])
-let neutralNews = ref([])
-let negativeNews = ref([])
+// Store Firestore unsubscribe functions
+let unsubscribePositive: any = null;
+let unsubscribeNeutral: any = null;
+let unsubscribeNegative: any = null;
 
+// Function to set up real-time Firestore listeners
+const setupListeners = (date: string) => {
+  // Ensure we remove previous listeners before adding new ones
+  if (unsubscribePositive) unsubscribePositive();
+  if (unsubscribeNeutral) unsubscribeNeutral();
+  if (unsubscribeNegative) unsubscribeNegative();
+
+  const { start, end } = getStartAndEndOfDay(date);
+
+  const createListener = (sentiment: string, newsRef: any) => {
+    const q = query(
+      collection(db, 'articles'),
+      where('sentiment', '==', sentiment),
+      where('publishedAt', '>=', start),
+      where('publishedAt', '<=', end),
+      orderBy('severity', sentiment !== 'positive' ? 'asc' : 'desc'),
+      orderBy('publishedAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      newsRef.value = snapshot.docs.map(doc => doc.data());
+      console.log(`🔄 Updated ${sentiment} news:`, newsRef.value);
+    }, (error) => {
+      console.error(`Firestore Listener Error for ${sentiment}:`, error);
+    });
+  };
+
+  unsubscribePositive = createListener('positive', positiveNews);
+  unsubscribeNeutral = createListener('neutral', neutralNews);
+  unsubscribeNegative = createListener('negative', negativeNews);
+};
+
+// Watch for `selectedDate` changes and update listeners
 watch(selectedDate, (newDate) => {
-  const { start, end } = getStartAndEndOfDay(newDate);
-
-  const postiveNewsQuery = query(
-    collection(db, 'articles'),
-    where('sentiment', '==', 'positive'),
-    where('publishedAt', '>=', start),
-    where('publishedAt', '<=', end),
-    orderBy('severity', 'desc'),
-    orderBy('publishedAt', 'desc')
-  );
-  positiveNews = useCollection(postiveNewsQuery);
-
-  const neutralNewsQuery = query(
-    collection(db, 'articles'),
-    where('sentiment', '==', 'neutral'),
-    where('publishedAt', '>=', start),
-    where('publishedAt', '<=', end),
-    orderBy('severity', 'asc'),
-    orderBy('publishedAt', 'desc')
-  );
-  neutralNews = useCollection(neutralNewsQuery);
-
-  const negativeNewsQuery = query(
-    collection(db, 'articles'),
-    where('sentiment', '==', 'negative'),
-    where('publishedAt', '>=', start),
-    where('publishedAt', '<=', end),
-    orderBy('severity', 'asc'),
-    orderBy('publishedAt', 'desc')
-  );
-  negativeNews = useCollection(negativeNewsQuery);
+  setupListeners(newDate);
 }, { immediate: true });
+
+// Cleanup listeners when component unmounts
+onUnmounted(() => {
+  if (unsubscribePositive) unsubscribePositive();
+  if (unsubscribeNeutral) unsubscribeNeutral();
+  if (unsubscribeNegative) unsubscribeNegative();
+});
 
 const sentimentFilter = ref(3)  //1=All News, 2=Neutral & Positive, 3=Only Positive
 
